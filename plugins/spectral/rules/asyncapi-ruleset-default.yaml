@@ -1,4 +1,4 @@
-extends: spectral:asyncapi
+extends: ["spectral:asyncapi"]
 rules:
   server-urls:
     description: Server URLs must be valid and use secure protocols
