@@ -1,0 +1,181 @@
+extends: spectral:asyncapi
+rules:
+  server-urls:
+    description: Server URLs must be valid and use secure protocols
+    severity: error
+    given: $.servers.[*].url
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(wss?|amqps?|mqtt)://.*"
+
+  operation-description:
+    description: Operations must have descriptions
+    severity: error
+    given: 
+      - $.channels.[*].publish.summary
+      - $.channels.[*].subscribe.summary
+    then:
+      function: truthy
+
+  message-payload-schema:
+    description: Messages must have a defined payload schema
+    severity: error
+    given: $.channels.[*].[publish,subscribe].message.payload
+    then:
+      function: truthy
+
+  channel-parameters:
+    description: Channel parameters must have descriptions
+    severity: warn
+    given: $.channels.[*].parameters.[*]
+    then:
+      field: description
+      function: truthy
+
+  message-headers:
+    description: Message headers should be defined when using protocols that support them
+    severity: warn
+    given: $.channels.[*].[publish,subscribe].message
+    then:
+      field: headers
+      function: truthy
+
+  correlation-id:
+    description: Messages should include correlation ID field
+    severity: warn
+    given: $.channels.[*].[publish,subscribe].message.headers.properties
+    then:
+      field: correlation-id
+      function: truthy
+
+  version-format:
+    description: API version must follow semantic versioning
+    severity: error
+    given: $.info.version
+    then:
+      function: pattern
+      functionOptions:
+        match: "^\\d+\\.\\d+\\.\\d+$"
+
+  bindings-defined:
+    description: Channel bindings should be defined for better protocol-specific details
+    severity: warn
+    given: $.channels.[*]
+    then:
+      field: bindings
+      function: truthy
+
+  message-examples:
+    description: Messages should include examples
+    severity: warn
+    given: $.channels.[*].[publish,subscribe].message
+    then:
+      field: examples
+      function: truthy
+
+  error-handling:
+    description: Error channels should be defined for handling failed messages
+    severity: warn
+    given: $.channels
+    then:
+      field: "error"
+      function: truthy
+
+  topic-naming:
+    description: Topics/channels should follow naming convention
+    severity: warn
+    given: $.channels.[*]~
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-z][a-z0-9-._/]+$"
+
+  dead-letter:
+    description: Dead letter queue channel should be defined
+    severity: warn
+    given: $.channels
+    then:
+      field: "dlq"
+      function: truthy
+
+  security-schemes:
+    description: Security schemes must be defined
+    severity: error
+    given: $.components
+    then:
+      field: securitySchemes
+      function: truthy
+
+  message-retention:
+    description: Message retention policy should be documented
+    severity: warn
+    given: $.channels.[*].[publish,subscribe]
+    then:
+      field: x-message-retention
+      function: truthy
+
+  schema-naming:
+    description: Schema names should use PascalCase
+    severity: warn
+    given: $.components.schemas.*~
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[A-Z][a-zA-Z0-9]*$"
+
+  operation-tags:
+    description: Operations should have tags for categorization
+    severity: warn
+    given: $.channels.[*].[publish,subscribe]
+    then:
+      field: tags
+      function: truthy
+
+  rate-limits:
+    description: Rate limits should be documented for publish operations
+    severity: warn
+    given: $.channels.[*].publish
+    then:
+      field: x-rate-limit
+      function: truthy
+
+  message-versioning:
+    description: Message payloads should include version field
+    severity: warn
+    given: $.channels.[*].[publish,subscribe].message.payload.properties
+    then:
+      field: version
+      function: truthy
+
+  message-timestamp:
+    description: Messages should include timestamp field
+    severity: warn
+    given: $.channels.[*].[publish,subscribe].message.payload.properties
+    then:
+      field: timestamp
+      function: truthy
+
+  server-security:
+    description: Servers should have security requirements defined
+    severity: error
+    given: $.servers.[*]
+    then:
+      field: security
+      function: truthy
+
+  message-size-limit:
+    description: Message size limits should be documented
+    severity: warn
+    given: $.channels.[*].[publish,subscribe]
+    then:
+      field: x-message-size-limit
+      function: truthy
+
+  retry-policy:
+    description: Retry policy should be documented for failed messages
+    severity: warn
+    given: $.channels.[*].[publish,subscribe]
+    then:
+      field: x-retry-policy
+      function: truthy

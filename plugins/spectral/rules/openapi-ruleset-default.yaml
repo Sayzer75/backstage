@@ -1,0 +1,197 @@
+extends: spectral:oas
+rules:
+  operation-description:
+    description: Operation must have a non-empty description.
+    severity: error
+    given: $.paths.*[get,post,put,delete,patch]
+    then:
+      field: description
+      function: truthy
+
+  operation-tags:
+    description: Operation must have at least one tag.
+    severity: error
+    given: $.paths.*[get,post,put,delete,patch]
+    then:
+      field: tags
+      function: length
+      functionOptions:
+        min: 1
+
+  pascal-case-definitions:
+    description: Schema definitions should use PascalCase.
+    severity: warn
+    given: $.components.schemas.*~
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[A-Z][a-zA-Z0-9]*$"
+
+  version-format:
+    description: API version must follow semantic versioning.
+    severity: error
+    given: $.info.version
+    then:
+      function: pattern
+      functionOptions:
+        match: "^\\d+\\.\\d+\\.\\d+$"
+
+  response-examples:
+    description: Success responses should include examples.
+    severity: warn
+    given: $.paths.*[get,post,put,delete,patch].responses[2**]
+    then:
+      field: content.*.examples
+      function: truthy
+
+  kebab-case-paths:
+    description: Paths should use kebab-case.
+    severity: warn
+    given: $.paths[*]~
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(/[a-z0-9-]+)*$"
+
+  error-response:
+    description: Error responses must have a schema.
+    severity: error
+    given: $.paths.*[get,post,put,delete,patch].responses[4**,5**]
+    then:
+      field: content.application/json.schema
+      function: truthy
+
+  rate-limit-response:
+    description: APIs should document rate limit headers.
+    severity: warn
+    given: $.paths.*[get,post,put,delete,patch].responses[2**].headers
+    then:
+      field: "X-RateLimit-Limit"
+      function: truthy
+
+  security-schemes:
+    description: API must define security schemes.
+    severity: error
+    given: $.components
+    then:
+      field: securitySchemes
+      function: truthy
+
+  operation-summary:
+    description: Operations should have a summary.
+    severity: warn
+    given: $.paths.*[get,post,put,delete,patch]
+    then:
+      field: summary
+      function: truthy
+
+  max-path-length:
+    description: Path length should not exceed 100 characters.
+    severity: warn
+    given: $.paths[*]~
+    then:
+      function: length
+      functionOptions:
+        max: 100
+
+  cors-headers:
+    description: CORS headers must be documented for all operations.
+    severity: warn
+    given: $.paths.*[get,post,put,delete,patch].responses[2**].headers
+    then:
+      field: "Access-Control-Allow-Origin"
+      function: truthy
+
+  camel-case-properties:
+    description: Schema properties should use camelCase.
+    severity: warn
+    given: $.components.schemas.*.properties.*~
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-z][a-zA-Z0-9]*$"
+
+  response-time-header:
+    description: Response time header should be documented.
+    severity: warn
+    given: $.paths.*[get,post,put,delete,patch].responses[2**].headers
+    then:
+      field: "X-Response-Time"
+      function: truthy
+
+  pagination-parameters:
+    description: Collection endpoints should have pagination parameters.
+    severity: warn
+    given: $.paths.*[get].parameters
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          contains:
+            type: object
+            properties:
+              name:
+                enum: ["page", "limit", "offset"]
+
+  request-body-validation:
+    description: POST/PUT/PATCH operations must have request body validation.
+    severity: error
+    given: $.paths.*[post,put,patch]
+    then:
+      field: requestBody.content.application/json.schema
+      function: truthy
+
+  error-response-structure:
+    description: Error responses must include code, message, and details fields.
+    severity: error
+    given: $.paths.*[get,post,put,delete,patch].responses[4**,5**].content.application/json.schema
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          required: ["code", "message"]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+
+  health-check-endpoint:
+    description: API should have a health check endpoint.
+    severity: warn
+    given: $.paths
+    then:
+      function: truthy
+      field: "/health"
+
+  api-deprecation:
+    description: Deprecated operations must include deprecation notice and sunset date.
+    severity: error
+    given: $.paths.*[get,post,put,delete,patch]
+    then:
+      field: deprecated
+      function: schema
+      functionOptions:
+        schema:
+          if:
+            const: true
+          then:
+            required: ["description", "x-deprecation-notice", "x-sunset-date"]
+
+  idempotency-key:
+    description: Non-safe operations should support idempotency keys.
+    severity: warn
+    given: $.paths.*[post,put,patch,delete].parameters
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          contains:
+            type: object
+            properties:
+              name:
+                const: "Idempotency-Key"
