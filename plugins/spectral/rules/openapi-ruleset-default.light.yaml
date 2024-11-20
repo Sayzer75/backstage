@@ -32,29 +32,10 @@ rules:
       function: truthy
       field: "/health"
 
-  detect-deprecated-operation:
-    description: Detect and warn about deprecated API operations
-    severity: warn
+  remove-deprecated-operation:
+    description: Deprecated API operations should be removed as soon as possible.
+    severity: info
     given: $.paths.[*][get,put,post,delete,patch,options,head]
     then:
       - field: deprecated
         function: truthy
-        
-  warn-deprecated-description:
-    description: Check for deprecation indicators in operation descriptions
-    severity: warn
-    given: $.paths.[*][get,put,post,delete,patch,options,head].description
-    then:
-      - function: pattern
-        functionOptions:
-          notMatch: /\b(deprecated|will be removed|no longer supported)\b/i
-          
-  recommend-replacement:
-    description: Suggest replacement for deprecated operations
-    severity: hint
-    given: $.paths.[*][get,put,post,delete,patch,options,head]
-    then:
-      - field: description
-        function: pattern
-        functionOptions:
-          match: /use\s+\w+\s+instead/i
