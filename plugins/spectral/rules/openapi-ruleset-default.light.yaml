@@ -29,8 +29,14 @@ rules:
     severity: warn
     given: $.paths
     then:
-      function: truthy
-      field: "/health"
+      - function: enumeration
+        functionOptions:
+          properties:
+            - /health
+            - /healthz
+            - /healthcheck
+            - /ready
+            - /readiness
 
   detect-deprecated-operation:
     description: Detect and warn about deprecated API operations
@@ -40,7 +46,7 @@ rules:
       - field: deprecated
         function: truthy
         
-  warn-deprecated-description:
+  warn-deprecated-description-en:
     description: Check for deprecation indicators in operation descriptions
     severity: warn
     given: $.paths.[*][get,put,post,delete,patch,options,head].description
@@ -49,7 +55,7 @@ rules:
         functionOptions:
           notMatch: /\b(deprecated|will be removed|no longer supported)\b/i
           
-  recommend-replacement:
+  recommend-replacement-en:
     description: Suggest replacement for deprecated operations
     severity: hint
     given: $.paths.[*][get,put,post,delete,patch,options,head]
@@ -58,3 +64,22 @@ rules:
         function: pattern
         functionOptions:
           match: /use\s+\w+\s+instead/i
+
+  warn-deprecated-description-fr:
+    description: Check for deprecation indicators in operation descriptions
+    severity: warn
+    given: $.paths.[*][get,put,post,delete,patch,options,head].description
+    then:
+      - function: pattern
+        functionOptions:
+          notMatch: /\b(obsolète|sera supprimé|n'est plus pris en charge)\b/i
+          
+  recommend-replacement-fr:
+    description: Suggest replacement for deprecated operations
+    severity: hint
+    given: $.paths.[*][get,put,post,delete,patch,options,head]
+    then:
+      - field: description
+        function: pattern
+        functionOptions:
+          match: /utiliser\s+\w+\s+à la place/i
