@@ -1,1 +1,47 @@
 extends: spectral:oas
+rules:
+  error-response:
+    description: Error responses must have a schema.
+    severity: error
+    given: $.paths.*[get,post,put,delete,patch].responses[4**,5**]
+    then:
+      field: content.application/json.schema
+      function: truthy
+
+  rate-limit-response:
+    description: APIs should document rate limit headers.
+    severity: warn
+    given: $.paths.*[get,post,put,delete,patch].responses[2**].headers
+    then:
+      field: "X-RateLimit-Limit"
+      function: truthy
+
+  operation-summary:
+    description: Operations should have a summary.
+    severity: warn
+    given: $.paths.*[get,post,put,delete,patch]
+    then:
+      field: summary
+      function: truthy
+  
+  health-check-endpoint:
+    description: API should have a health check endpoint.
+    severity: warn
+    given: $.paths
+    then:
+      function: truthy
+      field: "/health"
+
+  api-deprecation:
+    description: Deprecated operations must include deprecation notice and sunset date.
+    severity: error
+    given: $.paths.*[get,post,put,delete,patch]
+    then:
+      field: deprecated
+      function: schema
+      functionOptions:
+        schema:
+          if:
+            const: true
+          then:
+            required: ["description", "x-deprecation-notice", "x-sunset-date"]
