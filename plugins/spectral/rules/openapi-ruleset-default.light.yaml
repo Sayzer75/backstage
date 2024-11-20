@@ -29,14 +29,8 @@ rules:
     severity: warn
     given: $.paths
     then:
-      - function: enumeration
-        functionOptions:
-          properties:
-            - /health
-            - /healthz
-            - /healthcheck
-            - /ready
-            - /readiness
+      function: truthy
+      field: "/health"
 
   detect-deprecated-operation:
     description: Detect and warn about deprecated API operations
