@@ -1,5 +1,14 @@
 extends: spectral:oas
 rules:
+  default-response:
+    description: All operations should have a default (error) response.
+    message: Operation is missing a default response.
+    severity: warn
+    given: $.paths.*.*.responses
+    then:
+      field: default
+      function: truthy
+
   error-response:
     description: Error responses must have a schema.
     severity: error
@@ -7,6 +16,43 @@ rules:
     then:
       field: content.application/json.schema
       function: truthy
+
+  create-response-codes:
+    description: A create operation should have a 201 response.
+    message: A create operation should have a `201` response.
+    severity: warn
+    given: $.paths[*].post.responses
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          required: ['201']
+
+  update-response-codes:
+    description: An update operation should have a 200 response.
+    message: An update operation should have a `200` response.
+    severity: warn
+    given: $.paths[*].put.responses
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          required: ['200']
+  
+  delete-response-codes:
+    description: A delete operation should have a 204 response.
+    message: A delete operation should have a `204` response.
+    severity: warn
+    given: $.paths[*].delete.responses
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          oneOf:
+          - required: ['202']
+          - required: ['204']
+            not:
+              required: ['200']
 
   rate-limit-response:
     description: APIs should document rate limit headers.
@@ -31,11 +77,3 @@ rules:
     then:
       function: truthy
       field: "/health"
-
-  remove-deprecated-operation:
-    description: Deprecated API operations should be removed as soon as possible.
-    severity: info
-    given: $.paths.[*][get,put,post,delete,patch,options,head]
-    then:
-      - field: deprecated
-        function: truthy
