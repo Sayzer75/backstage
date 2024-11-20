@@ -18,16 +18,18 @@ rules:
       function: truthy
 
   create-response-codes:
-    description: A create operation should have a 201 response.
-    message: A create operation should have a `201` response.
+    description: A create operation should have a 201 or 200 response.
+    message: A create operation should have a `201` or `200` response.
     severity: warn
     given: $.paths[*].post.responses
     then:
       function: schema
       functionOptions:
         schema:
-          required: ['201']
-
+          oneOf:
+          - required: ['201']
+          - required: ['200']
+          
   update-response-codes:
     description: An update operation should have a 200 response.
     message: An update operation should have a `200` response.
