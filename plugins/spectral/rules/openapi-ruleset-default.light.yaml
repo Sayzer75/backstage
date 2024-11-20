@@ -40,7 +40,7 @@ rules:
       - field: deprecated
         function: truthy
         
-  warn-deprecated-description-en:
+  warn-deprecated-description:
     description: Check for deprecation indicators in operation descriptions
     severity: warn
     given: $.paths.[*][get,put,post,delete,patch,options,head].description
@@ -49,7 +49,7 @@ rules:
         functionOptions:
           notMatch: /\b(deprecated|will be removed|no longer supported)\b/i
           
-  recommend-replacement-en:
+  recommend-replacement:
     description: Suggest replacement for deprecated operations
     severity: hint
     given: $.paths.[*][get,put,post,delete,patch,options,head]
@@ -59,21 +59,3 @@ rules:
         functionOptions:
           match: /use\s+\w+\s+instead/i
 
-  warn-deprecated-description-fr:
-    description: Check for deprecation indicators in operation descriptions
-    severity: warn
-    given: $.paths.[*][get,put,post,delete,patch,options,head].description
-    then:
-      - function: pattern
-        functionOptions:
-          notMatch: /\b(obsolète|sera supprimé|n'est plus pris en charge)\b/i
-          
-  recommend-replacement-fr:
-    description: Suggest replacement for deprecated operations
-    severity: hint
-    given: $.paths.[*][get,put,post,delete,patch,options,head]
-    then:
-      - field: description
-        function: pattern
-        functionOptions:
-          match: /utiliser\s+\w+\s+à la place/i
