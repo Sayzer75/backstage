@@ -31,4 +31,3 @@ rules:
     then:
       function: truthy
       field: "/health"
-
